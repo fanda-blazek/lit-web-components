@@ -20,14 +20,15 @@ export class RawDialogRoot extends LitElement {
   @property({ type: Boolean, reflect: true, attribute: "data-open" })
   open = false;
 
-  @property({ type: String })
-  dismissable = "true";
+  @property({ type: Boolean, reflect: true })
+  dismissable = true;
 
   @property({ type: Boolean, reflect: true, attribute: "data-nested" })
   isNested = false;
 
   // Private fields
   private _rawDialog?: RawDialog;
+  private _rawDialogPanel?: HTMLElement;
   private _parentDialogRoot?: RawDialogRoot;
   private _isModal = false;
 
@@ -42,12 +43,15 @@ export class RawDialogRoot extends LitElement {
     super.disconnectedCallback();
     this.removeEventListener("click", this._handleActionClick);
     this._rawDialog?.nativeDialog?.removeEventListener("close", this._handleNativeClose);
+    this._rawDialog?.nativeDialog?.removeEventListener("click", this._handleLightDismiss);
   }
 
   async firstUpdated() {
     this._rawDialog = this.querySelector("raw-dialog") || undefined;
     await this._rawDialog?.updateComplete;
     this._rawDialog?.nativeDialog?.addEventListener("close", this._handleNativeClose);
+    this._rawDialog?.nativeDialog?.addEventListener("click", this._handleLightDismiss);
+    this._attachDialogPanel();
   }
 
   render() {
@@ -162,6 +166,37 @@ export class RawDialogRoot extends LitElement {
         composed: true,
       })
     );
+  }
+
+  private _handleLightDismiss = (event: MouseEvent) => {
+    if (!this.dismissable || !this._rawDialogPanel) {
+      return;
+    }
+
+    const rect = this._rawDialogPanel.getBoundingClientRect();
+
+    const clickedInPanel =
+      rect.top <= event.clientY &&
+      event.clientY <= rect.bottom &&
+      rect.left <= event.clientX &&
+      event.clientX <= rect.right;
+
+    if (!clickedInPanel) {
+      const target = event.target as HTMLElement;
+      const isTrigger = target.closest('[data-action="show"], [data-action="show-modal"]');
+
+      if (isTrigger && this.contains(isTrigger)) {
+        return;
+      }
+
+      if (dialogManager.isTopmost(this.id)) {
+        this.close();
+      }
+    }
+  };
+
+  private _attachDialogPanel() {
+    this._rawDialogPanel = this.querySelector("raw-dialog-panel") || undefined;
   }
 }
 
