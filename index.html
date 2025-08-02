@@ -7,10 +7,16 @@
     <title>Vite + Lit + TS</title>
     <link rel="stylesheet" href="./src/index.css" />
     <script type="module" src="/src/my-element.ts"></script>
+    <script type="module" src="/src/raw/index.ts"></script>
+    <script type="module" src="/src/examples.ts"></script>
   </head>
-  <body>
+  <body
+    class="dark min-h-[200dvh] bg-white px-2 py-16 text-zinc-800 antialiased dark:bg-zinc-950 dark:text-zinc-200"
+  >
     <my-element>
       <h1>Vite + Lit</h1>
     </my-element>
+
+    <div id="examples"></div>
   </body>
 </html>

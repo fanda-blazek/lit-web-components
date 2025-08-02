@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dialog Component Demo</title>
+  <script type="module" src="/src/raw/dialog/index.ts"></script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.5;
+      padding: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin-bottom: 2rem;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: white;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    button:hover {
+      background: #f5f5f5;
+    }
+
+    .demo-section {
+      margin-bottom: 3rem;
+    }
+
+    /* Dialog styles */
+    raw-dialog dialog {
+      padding: 0;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+      max-width: 500px;
+      width: 90vw;
+    }
+
+    raw-dialog dialog::backdrop {
+      background: transparent;
+    }
+
+    raw-dialog-backdrop {
+      background: rgb(0 0 0 / 0.5);
+    }
+
+    raw-dialog-panel {
+      padding: 2rem;
+    }
+
+    raw-dialog-panel h2 {
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+    }
+
+    raw-dialog-panel p {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      color: #666;
+    }
+
+    .dialog-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+      margin-top: 2rem;
+    }
+
+    /* Animation styles */
+    raw-dialog[data-opening] dialog {
+      animation: slideIn 0.2s ease-out;
+    }
+
+    raw-dialog[data-closing] dialog {
+      animation: slideOut 0.2s ease-in;
+    }
+
+    raw-dialog-backdrop[data-opening] {
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    raw-dialog-backdrop[data-closing] {
+      animation: fadeOut 0.2s ease-in;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    /* Nested dialog styles */
+    raw-dialog-panel[data-nested] {
+      background: #f9fafb;
+    }
+
+    raw-dialog-panel[data-child-dialog-open] {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Dialog Component Demo</h1>
+
+  <div class="demo-section">
+    <h2>Basic Modal Dialog</h2>
+    <raw-dialog-root>
+      <button data-action="show-modal">Open Modal Dialog</button>
+
+      <raw-dialog class="backdrop:bg-transparent">
+        <raw-dialog-backdrop></raw-dialog-backdrop>
+        <raw-dialog-panel>
+          <h2 data-raw-dialog-title>Welcome!</h2>
+          <p data-raw-dialog-description>
+            This is a basic modal dialog. Click outside or press Escape to close.
+          </p>
+          <div class="dialog-actions">
+            <button data-action="close" type="button">Cancel</button>
+            <button>Confirm</button>
+          </div>
+        </raw-dialog-panel>
+      </raw-dialog>
+    </raw-dialog-root>
+  </div>
+
+  <div class="demo-section">
+    <h2>Non-Modal Dialog</h2>
+    <button data-action="show" data-target="#non-modal">Open Non-Modal Dialog</button>
+
+    <raw-dialog-root id="non-modal">
+      <raw-dialog class="backdrop:bg-transparent">
+        <raw-dialog-panel>
+          <h3 data-raw-dialog-title>Non-Modal Dialog</h3>
+          <p>This dialog doesn't block interaction with the page.</p>
+          <button data-action="close" type="button">Close</button>
+        </raw-dialog-panel>
+      </raw-dialog>
+    </raw-dialog-root>
+  </div>
+
+  <div class="demo-section">
+    <h2>Non-Dismissable Dialog</h2>
+    <raw-dialog-root dismissable="false">
+      <button data-action="show-modal">Open Non-Dismissable Dialog</button>
+
+      <raw-dialog class="backdrop:bg-transparent">
+        <raw-dialog-backdrop></raw-dialog-backdrop>
+        <raw-dialog-panel>
+          <h2 data-raw-dialog-title>Important Action Required</h2>
+          <p data-raw-dialog-description>
+            This dialog cannot be dismissed by clicking outside or pressing Escape. You must click the close button.
+          </p>
+          <div class="dialog-actions">
+            <button data-action="close" type="button">I Understand</button>
+          </div>
+        </raw-dialog-panel>
+      </raw-dialog>
+    </raw-dialog-root>
+  </div>
+
+  <div class="demo-section">
+    <h2>Nested Dialogs</h2>
+    <raw-dialog-root>
+      <button data-action="show-modal">Open Parent Dialog</button>
+
+      <raw-dialog class="backdrop:bg-transparent">
+        <raw-dialog-backdrop></raw-dialog-backdrop>
+        <raw-dialog-panel>
+          <h2 data-raw-dialog-title>Parent Dialog</h2>
+          <p>This dialog contains another dialog.</p>
+
+          <raw-dialog-root>
+            <button data-action="show-modal">Open Nested Dialog</button>
+
+            <raw-dialog class="backdrop:bg-transparent">
+              <raw-dialog-backdrop></raw-dialog-backdrop>
+              <raw-dialog-panel>
+                <h3 data-raw-dialog-title>Nested Dialog</h3>
+                <p>This is a nested dialog. Notice the parent dialog is dimmed.</p>
+                <button data-action="close" type="button">Close Nested</button>
+              </raw-dialog-panel>
+            </raw-dialog>
+          </raw-dialog-root>
+
+          <div class="dialog-actions">
+            <button data-action="close" type="button">Close Parent</button>
+          </div>
+        </raw-dialog-panel>
+      </raw-dialog>
+    </raw-dialog-root>
+  </div>
+
+  <div class="demo-section">
+    <h2>External Trigger</h2>
+    <p>These buttons control a dialog from outside its scope:</p>
+    <button data-action="show-modal" data-target="#external-dialog">Open as Modal</button>
+    <button data-action="show" data-target="#external-dialog">Open as Non-Modal</button>
+
+    <raw-dialog-root id="external-dialog">
+      <raw-dialog class="backdrop:bg-transparent">
+        <raw-dialog-backdrop></raw-dialog-backdrop>
+        <raw-dialog-panel>
+          <h2 data-raw-dialog-title>Externally Triggered</h2>
+          <p>This dialog was opened from outside its root element.</p>
+          <button data-action="close" type="button">Close</button>
+        </raw-dialog-panel>
+      </raw-dialog>
+    </raw-dialog-root>
+  </div>
+
+  <script>
+    // Demo: Log dialog events
+    document.addEventListener('open', (e) => {
+      console.log('Dialog opened:', e.detail);
+    });
+
+    document.addEventListener('close', (e) => {
+      console.log('Dialog closed');
+    });
+
+    document.addEventListener('cancel', (e) => {
+      console.log('Dialog cancel attempted');
+    });
+  </script>
+</body>
+</html>
