@@ -1,6 +1,7 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { generateId } from "../../utils/generate-id.js";
+import { dialogManager } from "../../utils/dialog-manager/dialog-manager.js";
 import type { RawDialog } from "./dialog.js";
 
 @customElement("raw-dialog-root")
@@ -28,20 +29,25 @@ export class RawDialogRoot extends LitElement {
   // Private fields
   private _rawDialog?: RawDialog;
   private _parentDialogRoot?: RawDialogRoot;
+  private _isModal = false;
 
   // Lifecycle methods
   connectedCallback() {
     super.connectedCallback();
     this._detectNestedDialog();
-    this._setupActionListeners();
+    this.addEventListener("click", this._handleActionClick);
   }
 
-  firstUpdated() {
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.removeEventListener("click", this._handleActionClick);
+    this._rawDialog?.nativeDialog?.removeEventListener("close", this._handleNativeClose);
+  }
+
+  async firstUpdated() {
     this._rawDialog = this.querySelector("raw-dialog") || undefined;
-  }
-
-  updated(changedProperties: Map<string | number | symbol, unknown>) {
-    super.updated(changedProperties);
+    await this._rawDialog?.updateComplete;
+    this._rawDialog?.nativeDialog?.addEventListener("close", this._handleNativeClose);
   }
 
   render() {
@@ -51,7 +57,7 @@ export class RawDialogRoot extends LitElement {
   // Public methods
   show() {
     const nativeDialog = this._rawDialog?.nativeDialog;
-    if (nativeDialog) {
+    if (nativeDialog && !nativeDialog.open) {
       nativeDialog.show();
       this.open = true;
       this._dispatchOpenEvent(false);
@@ -60,19 +66,22 @@ export class RawDialogRoot extends LitElement {
 
   showModal() {
     const nativeDialog = this._rawDialog?.nativeDialog;
-    if (nativeDialog) {
+    if (nativeDialog && !nativeDialog.open) {
+      this._isModal = true;
+      dialogManager.registerModal(this.id);
       nativeDialog.showModal();
       this.open = true;
       this._dispatchOpenEvent(true);
     }
   }
-
   close() {
     const nativeDialog = this._rawDialog?.nativeDialog;
-    if (nativeDialog) {
+    if (nativeDialog && nativeDialog.open) {
       nativeDialog.close();
-      this.open = false;
-      this._dispatchCloseEvent();
+    } else if (this._isModal) {
+      // Fallback to unlock scroll if dialog is already closed
+      dialogManager.unregisterModal(this.id);
+      this._isModal = false;
     }
   }
 
@@ -82,18 +91,18 @@ export class RawDialogRoot extends LitElement {
   }
 
   // Private methods
-  private _setupActionListeners() {
-    // Find all elements with data-action within this root
-    const actionElements = this.querySelectorAll("[data-action]");
-
-    actionElements.forEach((element) => {
-      element.addEventListener("click", this._handleActionClick.bind(this));
-    });
-  }
-
-  private _handleActionClick(event: Event) {
+  private _handleActionClick = (event: Event) => {
     const target = event.target as HTMLElement;
-    const action = target.getAttribute("data-action");
+    const actionTarget = target.closest<HTMLElement>("[data-action]");
+
+    if (!actionTarget) {
+      return;
+    }
+
+    // Stop propagation only after confirming an action was clicked. - This prevents the event from bubbling up to parent dialogs and closing them as well.
+    event.stopPropagation();
+
+    const action = actionTarget.dataset.action;
 
     switch (action) {
       case "show":
@@ -106,11 +115,11 @@ export class RawDialogRoot extends LitElement {
         this.close();
         break;
     }
-  }
+  };
 
   private _dispatchOpenEvent(modal: boolean) {
     this.dispatchEvent(
-      new CustomEvent("open", {
+      new CustomEvent("raw-dialog-open", {
         detail: { modal },
         bubbles: true,
         composed: true,
@@ -130,9 +139,25 @@ export class RawDialogRoot extends LitElement {
     }
   }
 
+  private _handleNativeClose = (event: Event) => {
+    // Only handle events from our own dialog element
+    if (event.target !== this._rawDialog?.nativeDialog) {
+      return;
+    }
+
+    if (this.open) {
+      if (this._isModal) {
+        dialogManager.unregisterModal(this.id);
+        this._isModal = false;
+      }
+      this.open = false;
+      this._dispatchCloseEvent();
+    }
+  };
+
   private _dispatchCloseEvent() {
     this.dispatchEvent(
-      new CustomEvent("close", {
+      new CustomEvent("raw-dialog-close", {
         bubbles: true,
         composed: true,
       })
