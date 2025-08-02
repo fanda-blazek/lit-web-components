@@ -1,18 +1,16 @@
 import { LitElement, html, css } from "lit";
-import { customElement, property } from "lit/decorators.js";
-import { generateId } from "../../utils/generate-id.js";
+import { customElement } from "lit/decorators.js";
 
 @customElement("raw-dialog-backdrop")
 export class RawDialogBackdrop extends LitElement {
+  // Static properties
   static styles = css`
     :host {
       display: block;
     }
   `;
 
-  @property({ type: String })
-  id = generateId("dialog-backdrop");
-
+  // Lifecycle methods
   render() {
     return html`<slot></slot>`;
   }

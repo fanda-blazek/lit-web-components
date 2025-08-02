@@ -4,23 +4,23 @@ import { generateId } from "../../utils/generate-id.js";
 
 @customElement("raw-dialog")
 export class RawDialog extends LitElement {
+  // Static properties
   static styles = css`
     :host {
       display: contents;
     }
   `;
 
+  // Public properties
   @property({ type: String })
   id = generateId("dialog");
 
+  // Private fields
   private _dialogElement?: HTMLDialogElement;
 
+  // Lifecycle methods
   firstUpdated() {
     this._dialogElement = this.shadowRoot?.querySelector("dialog") || undefined;
-  }
-
-  get dialogElement() {
-    return this._dialogElement;
   }
 
   render() {
@@ -29,6 +29,11 @@ export class RawDialog extends LitElement {
         <slot></slot>
       </dialog>
     `;
+  }
+
+  // Public methods
+  get nativeDialog() {
+    return this._dialogElement;
   }
 }
 

@@ -1,0 +1,17 @@
+export const focusableElements = [
+  "button",
+  "input",
+  "select",
+  "textarea",
+  "a[href]",
+  "area[href]",
+  "iframe",
+  "object",
+  "embed",
+  "audio[controls]",
+  "video[controls]",
+  "details",
+  "summary",
+  "[contenteditable]",
+  '[tabindex]:not([tabindex="-1"])',
+];

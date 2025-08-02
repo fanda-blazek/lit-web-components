@@ -86,6 +86,13 @@ implementation note: We should check if user provided some id to those elements,
 ### Modal and Non-Modal Modes
 The dialog supports both modal and non-modal behaviors. In modal mode, the dialog captures focus and prevents interaction with background content. Non-modal dialogs allow interaction with other page elements while open.
 
+### Focus Management
+When the dialog is open, the focus is automatically moved to the first focusable element within the dialog.
+
+Focus should be locked within the dialog until it is closed. This should be handeled by using native html `<dialog>` under the hood.
+
+When the dialog is closed, the focus should be restored to the element that had focus before the dialog was opened.
+
 ### Scroll Lock
 When in modal mode, the dialog automatically prevents scrolling of the background content.
 
