@@ -16,18 +16,23 @@ export class RawDialogRoot extends LitElement {
   @property({ type: String })
   id = generateId("dialog-root");
 
-  @property({ type: Boolean, reflect: true })
+  @property({ type: Boolean, reflect: true, attribute: "data-open" })
   open = false;
 
   @property({ type: String })
   dismissable = "true";
 
+  @property({ type: Boolean, reflect: true, attribute: "data-nested" })
+  isNested = false;
+
   // Private fields
   private _rawDialog?: RawDialog;
+  private _parentDialogRoot?: RawDialogRoot;
 
   // Lifecycle methods
   connectedCallback() {
     super.connectedCallback();
+    this._detectNestedDialog();
     this._setupActionListeners();
   }
 
@@ -37,9 +42,6 @@ export class RawDialogRoot extends LitElement {
 
   updated(changedProperties: Map<string | number | symbol, unknown>) {
     super.updated(changedProperties);
-    if (changedProperties.has("open")) {
-      this._updateDataAttributes();
-    }
   }
 
   render() {
@@ -74,6 +76,11 @@ export class RawDialogRoot extends LitElement {
     }
   }
 
+  // For nested state
+  get parentDialogRoot() {
+    return this._parentDialogRoot;
+  }
+
   // Private methods
   private _setupActionListeners() {
     // Find all elements with data-action within this root
@@ -101,11 +108,6 @@ export class RawDialogRoot extends LitElement {
     }
   }
 
-  private _updateDataAttributes() {
-    this.toggleAttribute("data-open", this.open);
-    this.toggleAttribute("data-closed", !this.open);
-  }
-
   private _dispatchOpenEvent(modal: boolean) {
     this.dispatchEvent(
       new CustomEvent("open", {
@@ -114,6 +116,18 @@ export class RawDialogRoot extends LitElement {
         composed: true,
       })
     );
+  }
+
+  private _detectNestedDialog() {
+    let parent = this.parentElement;
+    while (parent) {
+      if (parent instanceof RawDialogRoot) {
+        this._parentDialogRoot = parent;
+        this.isNested = true;
+        break;
+      }
+      parent = parent.parentElement;
+    }
   }
 
   private _dispatchCloseEvent() {
