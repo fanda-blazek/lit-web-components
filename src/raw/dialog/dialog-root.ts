@@ -1,7 +1,7 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { generateId } from "../../utils/generate-id.js";
-import { dialogManager } from "../../utils/dialog-manager/dialog-manager.js";
+import { dialogManager } from "./dialog-manager.js";
 import type { RawDialog } from "./dialog.js";
 
 @customElement("raw-dialog-root")

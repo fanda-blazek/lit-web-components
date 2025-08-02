@@ -1,4 +1,4 @@
-import { scrollLock } from "../scroll-lock.js";
+import { scrollLock } from "../../utils/scroll-lock.js";
 
 class DialogManager {
   private activeModals = new Set<string>();
