@@ -20,8 +20,18 @@ export class RawDialogRoot extends LitElement {
   @property({ type: Boolean, reflect: true, attribute: "data-open" })
   open = false;
 
-  @property({ type: Boolean, reflect: true })
-  dismissable = true;
+  @property({
+    type: Boolean,
+    attribute: "data-dismissable",
+    // Lit is treating "false" string in the attribute as a truthy value, so we need to handle it explicitly
+    converter: {
+      fromAttribute: (value: string | null) => {
+        if (value === null) return true;
+        return value !== "false";
+      },
+    },
+  })
+  isDismissable = true;
 
   @property({ type: Boolean, reflect: true, attribute: "data-nested" })
   isNested = false;
@@ -47,6 +57,7 @@ export class RawDialogRoot extends LitElement {
   }
 
   async firstUpdated() {
+    console.log(`Dialog ${this.id} dismissable property is:`, this.isDismissable);
     this._rawDialog = this.querySelector("raw-dialog") || undefined;
     await this._rawDialog?.updateComplete;
     this._rawDialog?.nativeDialog?.addEventListener("close", this._handleNativeClose);
@@ -169,7 +180,7 @@ export class RawDialogRoot extends LitElement {
   }
 
   private _handleLightDismiss = (event: MouseEvent) => {
-    if (!this.dismissable || !this._rawDialogPanel) {
+    if (!this.isDismissable || !this._rawDialogPanel) {
       return;
     }
 

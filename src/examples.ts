@@ -2,6 +2,7 @@ import {
   edgeScrollbarDialogExample,
   basicDialogExample,
   nestedDialogExample,
+  basicNonDismissableDialogExample,
 } from "./raw/dialog/dialog-examples";
 
 document.querySelector<HTMLDivElement>("#examples")!.innerHTML = `
@@ -11,6 +12,9 @@ document.querySelector<HTMLDivElement>("#examples")!.innerHTML = `
     <div class="mt-12 flex flex-col items-center justify-center gap-5">
       <div>
         ${basicDialogExample}
+      </div>
+      <div>
+        ${basicNonDismissableDialogExample}
       </div>
       <div>
         ${nestedDialogExample}
