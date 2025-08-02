@@ -57,7 +57,6 @@ export class RawDialogRoot extends LitElement {
   }
 
   async firstUpdated() {
-    console.log(`Dialog ${this.id} dismissable property is:`, this.isDismissable);
     this._rawDialog = this.querySelector("raw-dialog") || undefined;
     await this._rawDialog?.updateComplete;
     this._rawDialog?.nativeDialog?.addEventListener("close", this._handleNativeClose);
